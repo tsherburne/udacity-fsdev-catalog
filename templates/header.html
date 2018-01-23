@@ -1,0 +1,14 @@
+<div class="w3-bar w3-theme-dark w3-border w3-large">
+    <a title="Home" href="{{url_for('routeCatalog')}}" class="w3-bar-item w3-button">
+        <i class="fa fa-home"></i></a>
+    <a class="w3-bar-item">Wood Products Catalog<a/>
+    {% if 'username' in session: %}
+        <a title="Logout" href="#" class="w3-bar-item w3-button w3-right">
+            <i class="fa fa-sign-out"></i></a>
+        <a title="Add Item" href="#" class="w3-bar-item w3-button w3-right">
+            <i class="fa fa-plus-circle"></i></a>
+    {% else: %}
+        <a title="Login" href="#" class="w3-bar-item w3-button w3-right">
+            <i class="fa fa-sign-in"></i></a>
+    {% endif %}
+</div>

@@ -1,0 +1,37 @@
+{% extends "main.html" %} {% block content %} {% include "header.html" %}
+<div class="w3-cell-row">
+
+    <div class="w3-container w3-cell">
+        <table class="w3-table-all w3-striped w3-border w3-text-theme w3-margin-top">
+            <tr>
+                <th>Catagory</th>
+                <th>Latest Item</th>
+            </tr>
+            {% for category in categories %}
+                <tr>
+                    <td>{{category.name}}</td>
+                </tr>
+         	{% endfor %}
+        </table>
+    </div>
+
+    <div class="w3-container w3-cell">
+        <table class="w3-table-all w3-striped w3-border w3-text-theme w3-margin-top">
+            <tr>
+                <th colspan="2" class="w3-center"> Items for Doors Category</th>
+            </tr>
+            <tr>
+                <th>Item</th>
+                <th>Description</th>
+            </tr>
+            {% for item in items %}
+                <tr>
+                    <td>{{item.name}}</td>
+                    <td>{{item.description}}</td>
+                </tr>
+         	{% endfor %} 
+         </table>
+    </div>
+</div>
+
+{% endblock %}
