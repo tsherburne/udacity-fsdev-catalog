@@ -25,7 +25,25 @@ session.commit()
 
 #Add initial Items
 i1=Item(name="Raised Panel", description="Classic Look", category=c1)
+i2=Item(name="Flat Panel", description="Traditional Look", category=c1)
+
+i3=Item(name="2x4", description="Wall Framing", category=c2)
+i4=Item(name="2x10", description="Floor Joists", category=c2)
+
+i5=Item(name="4x8 Flooring", description="Finished One Side", category=c3)
+i6=Item(name="4x8 Cherry", description="Finished Both Sides", category=c3)
+
+i7=Item(name="Trex", description="No maintenance", category=c4)
+i8=Item(name="Cedar", description="Natural finish", category=c4)
+
 session.add(i1)
+session.add(i2)
+session.add(i3)
+session.add(i4)
+session.add(i5)
+session.add(i6)
+session.add(i7)
+session.add(i8)
 
 session.commit();
 

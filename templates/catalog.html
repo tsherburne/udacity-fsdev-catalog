@@ -2,33 +2,42 @@
 <div class="w3-cell-row">
 
     <div class="w3-container w3-cell">
-        <table class="w3-table-all w3-striped w3-border w3-text-theme w3-margin-top">
+        <table class="w3-table-all w3-striped w3-border 
+                        w3-text-theme w3-margin-top">
             <tr>
-                <th>Catagory</th>
-                <th>Latest Item</th>
+                <th>Catagory (select to view items)</th>
             </tr>
             {% for category in categories %}
-                <tr>
-                    <td>{{category.name}}</td>
-                </tr>
+            <tr>
+                <td><a href = "{{url_for('showCatalog', 
+                                        category_id = category.id)}}">
+                        {{category.name}}
+                    </a>
+                </td>
+            </tr>
          	{% endfor %}
         </table>
     </div>
 
     <div class="w3-container w3-cell">
-        <table class="w3-table-all w3-striped w3-border w3-text-theme w3-margin-top">
+        <table class="w3-table-all w3-striped w3-border 
+                        w3-text-theme w3-margin-top">
             <tr>
-                <th colspan="2" class="w3-center"> Items for Doors Category</th>
+                <th colspan="2" class="w3-center">
+                    <span>Items for</span>
+                    <span class="selected_item">{{session['sel_cat']}}</span>
+                    <span>Category</span>
+                </th>
             </tr>
             <tr>
                 <th>Item</th>
                 <th>Description</th>
             </tr>
             {% for item in items %}
-                <tr>
-                    <td>{{item.name}}</td>
-                    <td>{{item.description}}</td>
-                </tr>
+            <tr>
+                <td>{{item.name}}</td>
+                <td>{{item.description}}</td>
+            </tr>
          	{% endfor %} 
          </table>
     </div>

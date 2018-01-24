@@ -38,8 +38,6 @@ def showCatalog(category_id):
     categories = session.query(Category).order_by(asc(Category.name))
 
     items = session.query(Item).filter_by(category_id=category_id).order_by(asc(Item.name)).all()
-    for item in items:
-        print(item.name, item.description)
 
     return render_template('catalog.html', categories=categories, items=items)
     
