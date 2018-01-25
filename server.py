@@ -14,12 +14,76 @@ session = DBSession()
 
 app = Flask(__name__)
 
+# Update Item in Database
+@app.route('/updateItem/<int:item_id>', methods=['POST'])
+def updateItem(item_id):
+    try:
+        item = session.query(Item).filter_by(id=item_id).one()
+        if request.form['name']:
+            item.name = request.form['name']
+        if request.form['description']:
+            item.description = request.form['description']
+        if request.form['category']:
+            item.category_id = request.form['category']
+        session.add(item)
+        session.commit()
+        flash('Item Updated')
+    except:
+        flash('Item not found')
+
+    return redirect(url_for('editItem', mode="e", item_id=item.id))
+ 
+# Delete Item from Database
+@app.route('/deleteItem/<int:item_id>', methods=['POST'])
+def deleteItem(item_id):
+    try:
+        item = session.query(Item).filter_by(id=item_id).one()
+        session.delete(item)
+        session.commit()
+        flash('Item deleted')
+    except:
+        flash('Item not found')
+    return redirect(url_for('routeCatalog'))
+
+# Create Item in Database
+@app.route('/createItem', methods=['POST'])
+def createItem():
+    try:
+        print request.form
+        
+        item = Item(name=request.form['name'], 
+                    description=request.form['description'], 
+                    category_id=request.form['category'])
+                    
+        session.add(item)
+        session.commit()
+        flash('Item Created')
+    except:
+        flash('Create failed')
+
+    return redirect(url_for('routeCatalog'))
+
+
+# Edit Item
+@app.route('/item/<string:mode>/<int:item_id>/')
+def editItem(mode, item_id):
+    if mode != "a" and mode != "e":
+        return redirect(url_for('routeCatalog'))
+
+    if mode == "e":
+        try:
+            item = session.query(Item).filter_by(id=item_id).one()
+        except:
+            return redirect(url_for('routeCatalog'))
+    else:
+        item = None
+        
+    return render_template('item.html', mode=mode, item=item)
+
+
 # Show catalog and item list for selected category
 @app.route('/catalog/<int:category_id>/')
 def showCatalog(category_id):
-    print login_session
-    print category_id
-
     if 'username' in login_session:
         del login_session[ 'username' ]
     else:
@@ -32,12 +96,12 @@ def showCatalog(category_id):
     else:
         if 'sel_cat' in login_session:
             del login_session[ 'sel_cat']
-        print("Doing Redirect /")
         return redirect(url_for('routeCatalog'))
         
     categories = session.query(Category).order_by(asc(Category.name))
-
-    items = session.query(Item).filter_by(category_id=category_id).order_by(asc(Item.name)).all()
+    # Select Items for "selected" Category
+    items = session.query(Item).filter_by(category_id=category_id).\
+                order_by(asc(Item.name)).all()
 
     return render_template('catalog.html', categories=categories, items=items)
     
@@ -46,7 +110,6 @@ def showCatalog(category_id):
 def routeCatalog():
     category = session.query(Category).order_by(asc(Category.name)).first()
     category_id = category.id
-    print("Doing Redirect: " + str(category_id))
     return redirect(url_for('showCatalog', category_id=category_id))
     
 if __name__ == '__main__':

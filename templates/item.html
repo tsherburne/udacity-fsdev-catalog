@@ -1,0 +1,62 @@
+{% extends "main.html" %} {% block content %} {% include "header.html" %}
+<div class="w3-card w3-margin w3-light-grey">
+    {% if mode == "e" %}
+        <p class="w3-center w3-large">Edit Item</p>
+    {% else %}
+        <p class="w3-center w3-large">Create Item</p>
+    {% endif %}
+    <form class="w3-container w3-light-grey" method="post">
+        <label>Item Name</label>
+        <input  class="w3-input w3-border" type="text" 
+                name="name" required
+                {% if mode == 'e' %}
+                    value="{{item.name}}" 
+                {% endif %}
+        >
+
+        <label>Item Description</label>
+        <input  class="w3-input w3-border" type="text" 
+                name="description" required
+                {% if mode == 'e' %}
+                    value="{{item.description}}"
+                {% endif %}
+        >
+        
+        <label>Item Category</label>
+        <select class="w3-select" name="category">
+            <option value="" disabled selected>Choose item category</option>
+            <option value="1"
+                    {% if item.category_id == 1 %}selected{%endif%}>
+                    Doors
+            </option>
+            <option value="4"
+                    {% if item.category_id == 4 %}selected{%endif%}>
+                    Decking
+            </option>
+            <option value="2"
+                {% if item.category_id == 2 %}selected{%endif%}>
+                Lumber
+            </option>
+            <option value="3"
+                {% if item.category_id == 3 %}selected{%endif%}>
+                Plywood
+            </option>
+        </select>
+        {% if mode == 'e' %}
+            <button type="submit" 
+                    formaction="{{url_for('updateItem',item_id=item.id)}}"
+                    class="w3-btn w3-theme-d3 w3-margin">Update Item</button>
+            <button type="submit" 
+                    formaction="{{url_for('deleteItem', item_id=item.id)}}"
+                    class="w3-btn w3-theme-d3 w3-margin">Delete Item</button>
+        {% else %}
+            <button type="submit" formaction="{{url_for('createItem')}}"
+                    class="w3-btn w3-theme-d3 w3-margin">Create Item</button>
+        {% endif %}
+
+        <a href="{{url_for('routeCatalog')}}" 
+            class="w3-btn w3-theme-d3 w3-margin">Cancel</a>
+
+    </form>
+</div>
+{% endblock %}

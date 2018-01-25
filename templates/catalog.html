@@ -10,7 +10,7 @@
             {% for category in categories %}
             <tr>
                 <td><a href = "{{url_for('showCatalog', 
-                                        category_id = category.id)}}">
+                        category_id = category.id)}}">
                         {{category.name}}
                     </a>
                 </td>
@@ -26,7 +26,7 @@
                 <th colspan="2" class="w3-center">
                     <span>Items for</span>
                     <span class="selected_item">{{session['sel_cat']}}</span>
-                    <span>Category</span>
+                    <span>Category (select to view detail)</span>
                 </th>
             </tr>
             <tr>
@@ -35,7 +35,11 @@
             </tr>
             {% for item in items %}
             <tr>
-                <td>{{item.name}}</td>
+                <td><a href = "{{url_for('editItem', 
+                                mode="e", item_id=item.id)}}">
+                        {{item.name}}
+                    </a>
+                </td>
                 <td>{{item.description}}</td>
             </tr>
          	{% endfor %} 
