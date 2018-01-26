@@ -3,9 +3,9 @@
         class="w3-bar-item w3-button">
         <i class="fa fa-home"></i></a>
     <a class="w3-bar-item">Wood Products Catalog<a/>
-    {% if 'username' in session: %}
+    {% if 'credentials' in session: %}
         <a title="Logout" 
-            href="{{url_for('gdisconnect')}}" 
+            href="{{url_for('clear_credentials')}}" 
             class="w3-bar-item w3-button w3-right">
             <i class="fa fa-sign-out"></i>
         </a>
@@ -16,7 +16,7 @@
         </a>
     {% else: %}
         <a title="Login" 
-            href="{{url_for('showLogin')}}" 
+            href="{{url_for('authorize')}}" 
             class="w3-bar-item w3-button w3-right">
             <i class="fa fa-sign-in"></i>
         </a>
