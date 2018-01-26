@@ -25,6 +25,14 @@ SCOPES = ['openid']
 
 app = Flask(__name__)
 
+@app.route('/api/item/<int:item_id>/JSON')
+def apiItemJSON(item_id):
+    try:
+        item = session.query(Item).filter_by(id=item_id).one()
+        return jsonify(Item=item.serialize)
+    except:
+        return("Item not found!")
+        
 @app.route('/authorize')
 def authorize():
     # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
