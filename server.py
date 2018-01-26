@@ -62,6 +62,8 @@ def oauth2callback():
     # Store credentials in the session.
     credentials = flow.credentials
     flask.session['credentials'] = credentials_to_dict(credentials)
+
+    flash('User Logged In')
     
     return flask.redirect(flask.url_for('routeCatalog'))
 
@@ -73,59 +75,77 @@ def credentials_to_dict(credentials):
           'client_secret': credentials.client_secret,
           'scopes': credentials.scopes}
 
-# Upon logout - clear credentials    
+# Upon revoke credential and clear session credentials
 @app.route('/clear')
 def clear_credentials():
     if 'credentials' in flask.session:
+        credentials = google.oauth2.credentials.Credentials(
+                                **flask.session['credentials'])
+    
+        requests.post('https://accounts.google.com/o/oauth2/revoke',
+            params={'token': credentials.token},
+            headers = {'content-type': 'application/x-www-form-urlencoded'})
+
+    
         del flask.session['credentials']
+
+    flash('User Logged Out')
     return redirect(url_for('routeCatalog'))
+
 
 # Update Item in Database
 @app.route('/updateItem/<int:item_id>', methods=['POST'])
 def updateItem(item_id):
-    try:
-        item = session.query(Item).filter_by(id=item_id).one()
-        if request.form['name']:
-            item.name = request.form['name']
-        if request.form['description']:
-            item.description = request.form['description']
-        if request.form['category']:
-            item.category_id = request.form['category']
-        session.add(item)
-        session.commit()
-        flash('Item Updated')
-    except:
-        flash('Item not found')
+    if 'credentials' in flask.session:
 
-    return redirect(url_for('editItem', mode="e", item_id=item.id))
- 
+        try:
+            item = session.query(Item).filter_by(id=item_id).one()
+            if request.form['name']:
+                item.name = request.form['name']
+            if request.form['description']:
+                item.description = request.form['description']
+            if request.form['category']:
+                item.category_id = request.form['category']
+            session.add(item)
+            session.commit()
+            flash('Item Updated')
+            return redirect(url_for('editItem', mode="e", item_id=item.id))
+        except:
+            flash('Item not found')
+            return redirect(url_for('routeCatalog'))
+    else:
+        return redirect(url_for('routeCatalog'))
+
 # Delete Item from Database
 @app.route('/deleteItem/<int:item_id>', methods=['POST'])
 def deleteItem(item_id):
-    try:
-        item = session.query(Item).filter_by(id=item_id).one()
-        session.delete(item)
-        session.commit()
-        flash('Item deleted')
-    except:
-        flash('Item not found')
+    if 'credentials' in flask.session:
+        try:
+            item = session.query(Item).filter_by(id=item_id).one()
+            session.delete(item)
+            session.commit()
+            flash('Item deleted')
+        except:
+            flash('Item not found')
     return redirect(url_for('routeCatalog'))
 
 # Create Item in Database
 @app.route('/createItem', methods=['POST'])
 def createItem():
-    try:
-        print request.form
-        
-        item = Item(name=request.form['name'], 
-                    description=request.form['description'], 
-                    category_id=request.form['category'])
-                    
-        session.add(item)
-        session.commit()
-        flash('Item Created')
-    except:
-        flash('Create failed')
+    if 'credentials' in flask.session:
+
+        try:
+            print request.form
+            
+            item = Item(name=request.form['name'], 
+                        description=request.form['description'], 
+                        category_id=request.form['category'])
+                        
+            session.add(item)
+            session.commit()
+            flash('Item Created')
+        except:
+            flash('Create failed')
 
     return redirect(url_for('routeCatalog'))
 

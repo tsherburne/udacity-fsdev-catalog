@@ -42,17 +42,20 @@
                 Plywood
             </option>
         </select>
-        {% if mode == 'e' %}
-            <button type="submit" 
-                    formaction="{{url_for('updateItem',item_id=item.id)}}"
-                    class="w3-btn w3-theme-d3 w3-margin">Update Item</button>
-            <button type="submit" 
-                    formaction="{{url_for('deleteItem', item_id=item.id)}}"
-                    class="w3-btn w3-theme-d3 w3-margin">Delete Item</button>
-        {% else %}
-            <button type="submit" formaction="{{url_for('createItem')}}"
-                    class="w3-btn w3-theme-d3 w3-margin">Create Item</button>
+        {% if 'credentials' in session: %}
+            {% if mode == 'e' %}
+                <button type="submit" 
+                        formaction="{{url_for('updateItem',item_id=item.id)}}"
+                        class="w3-btn w3-theme-d3 w3-margin">Update Item</button>
+                <button type="submit" 
+                        formaction="{{url_for('deleteItem', item_id=item.id)}}"
+                        class="w3-btn w3-theme-d3 w3-margin">Delete Item</button>
+            {% else %}
+                <button type="submit" formaction="{{url_for('createItem')}}"
+                        class="w3-btn w3-theme-d3 w3-margin">Create Item</button>
+            {% endif %}
         {% endif %}
+
 
         <a href="{{url_for('routeCatalog')}}" 
             class="w3-btn w3-theme-d3 w3-margin">Cancel</a>
