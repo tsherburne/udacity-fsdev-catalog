@@ -143,6 +143,7 @@ def clear_credentials():
                                'application/x-www-form-urlencoded'})
 
         del flask.session['credentials']
+        del flask.session['user_id']
 
     flash('User Logged Out')
     return redirect(url_for('routeCatalog'))
@@ -155,15 +156,20 @@ def updateItem(item_id):
 
         try:
             item = session.query(Item).filter_by(id=item_id).one()
-            if request.form['name']:
-                item.name = request.form['name']
-            if request.form['description']:
-                item.description = request.form['description']
-            if request.form['category']:
-                item.category_id = request.form['category']
-            session.add(item)
-            session.commit()
-            flash('Item Updated')
+            # Verify logged in user is owner of item
+
+            if item.user_id == login_session['user_id']:
+                if request.form['name']:
+                    item.name = request.form['name']
+                if request.form['description']:
+                    item.description = request.form['description']
+                if request.form['category']:
+                    item.category_id = request.form['category']
+                session.add(item)
+                session.commit()
+                flash('Item Updated')
+            else:
+                flash('Only owner can update item.')
             return redirect(url_for('editItem', mode="e", item_id=item.id))
         except exc.DatabaseError:
             flash('Item not found')
@@ -178,9 +184,13 @@ def deleteItem(item_id):
     if 'credentials' in flask.session:
         try:
             item = session.query(Item).filter_by(id=item_id).one()
-            session.delete(item)
-            session.commit()
-            flash('Item deleted')
+            # Verify logged in user is owner of item
+            if item.user_id == login_session['user_id']:
+                session.delete(item)
+                session.commit()
+                flash('Item deleted')
+            else:
+                flash('Only owner can delete item.')
         except exc.DatabaseError:
             flash('Item not found')
     return redirect(url_for('routeCatalog'))
@@ -192,11 +202,10 @@ def createItem():
     if 'credentials' in flask.session:
 
         try:
-            print request.form
-
             item = Item(name=request.form['name'],
                         description=request.form['description'],
-                        category_id=request.form['category'])
+                        category_id=request.form['category'],
+                        user_id=login_session['user_id'])
 
             session.add(item)
             session.commit()

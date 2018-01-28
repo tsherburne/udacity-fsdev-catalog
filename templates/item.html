@@ -43,14 +43,14 @@
             </option>
         </select>
         {% if 'credentials' in session: %}
-            {% if mode == 'e' %}
+            {% if mode == 'e' and session['user_id'] == item.user_id %}
                 <button type="submit" 
                         formaction="{{url_for('updateItem',item_id=item.id)}}"
                         class="w3-btn w3-theme-d3 w3-margin">Update Item</button>
                 <button type="submit" 
                         formaction="{{url_for('deleteItem', item_id=item.id)}}"
                         class="w3-btn w3-theme-d3 w3-margin">Delete Item</button>
-            {% else %}
+            {% elif mode == 'a' %}
                 <button type="submit" formaction="{{url_for('createItem')}}"
                         class="w3-btn w3-theme-d3 w3-margin">Create Item</button>
             {% endif %}
