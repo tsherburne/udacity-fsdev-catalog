@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, redirect, jsonify
 from flask import make_response, url_for, flash, session as login_session
 
-from sqlalchemy import create_engine, asc
+from sqlalchemy import create_engine, asc, exc
 from sqlalchemy.orm import sessionmaker
-from db_setup import Base, Category, Item
+from db_setup import Base, Category, Item, User
 
 import flask
 import os
@@ -11,6 +11,8 @@ import requests
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
+from oauth2client.client import AccessTokenCredentials
+
 
 # Connect to the database and create a session
 engine = create_engine('sqlite:///catalog.db')
@@ -23,6 +25,7 @@ session = DBSession()
 CLIENT_SECRETS_FILE = "client_secrets.json"
 SCOPES = ['openid']
 
+
 app = Flask(__name__)
 
 
@@ -32,7 +35,7 @@ def apiItemJSON(item_id):
     try:
         item = session.query(Item).filter_by(id=item_id).one()
         return jsonify(Item=item.serialize)
-    except DatabaseError:
+    except exc.DatabaseError:
         return("Item not found!")
 
 
@@ -77,12 +80,48 @@ def oauth2callback():
     credentials = flow.credentials
     flask.session['credentials'] = credentials_to_dict(credentials)
 
-    flash('User Logged In')
+    # Get user info
+    credentials = AccessTokenCredentials(credentials.token,
+                                         'my-user-agent/1.0')
+    userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
+    params = {'access_token': credentials.access_token, 'alt': 'json'}
+    answer = requests.get(userinfo_url, params=params)
+    data = answer.json()
+
+    # Store username and google_id
+    flask.session['username'] = data['name']
+    flask.session['google_id'] = data['id']
+    print flask.session['username'] + ": " + flask.session['google_id']
+
+    # Check if user exists
+    user = session.query(User).filter_by(google_id=data['id']).one_or_none()
+    if user is None:
+        # Add User to Database
+        try:
+            user = User(name=data['name'],
+                        google_id=data['id'])
+
+            session.add(user)
+            session.commit()
+
+            # Retrieve the generate user.id
+            user = session.query(User).filter_by(google_id=data['id']).\
+                one_or_none()
+            flask.session['user_id'] = user.id
+
+            flash('New: User Logged In')
+        except exc.DatabaseError:
+            flash('New User Create failed')
+
+    else:
+        flask.session['user_id'] = user.id
+        flash('Existing: User Logged In')
 
     return flask.redirect(flask.url_for('routeCatalog'))
 
 
 def credentials_to_dict(credentials):
+
     return {'token': credentials.token,
             'refresh_token': credentials.refresh_token,
             'token_uri': credentials.token_uri,
@@ -126,7 +165,7 @@ def updateItem(item_id):
             session.commit()
             flash('Item Updated')
             return redirect(url_for('editItem', mode="e", item_id=item.id))
-        except DatabaseError:
+        except exc.DatabaseError:
             flash('Item not found')
             return redirect(url_for('routeCatalog'))
     else:
@@ -142,7 +181,7 @@ def deleteItem(item_id):
             session.delete(item)
             session.commit()
             flash('Item deleted')
-        except DatabaseError:
+        except exc.DatabaseError:
             flash('Item not found')
     return redirect(url_for('routeCatalog'))
 
@@ -162,7 +201,7 @@ def createItem():
             session.add(item)
             session.commit()
             flash('Item Created')
-        except DatabaseError:
+        except exc.DatabaseError:
             flash('Create failed')
 
     return redirect(url_for('routeCatalog'))
@@ -177,7 +216,7 @@ def editItem(mode, item_id):
     if mode == "e":
         try:
             item = session.query(Item).filter_by(id=item_id).one()
-        except DatabaseError:
+        except exc.DatabaseError:
             return redirect(url_for('routeCatalog'))
     else:
         item = None
