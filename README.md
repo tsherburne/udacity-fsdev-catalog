@@ -42,7 +42,7 @@ Open a browser and to view and update the Wood Products Catalog!
 https://<host>:8080
 ```
 
-The Catalog can be browsed without logging in, but modification (Create / Update / Delete) of an item requires login. Buttons in the right hand corner of the header provide login / logout functions.
+The Catalog can be browsed without logging in, but modification (Create / Update / Delete) of an item requires login. Buttons in the right hand corner of the header provide login / logout functions. Additionally, only the user who creates an item can later update or delete that item.
 
 A JSON endpoint is provided to retrive an item from the catalog.
 ```
